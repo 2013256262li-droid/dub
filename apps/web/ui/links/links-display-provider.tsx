@@ -14,6 +14,7 @@ import {
   Dispatch,
   PropsWithChildren,
   SetStateAction,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -34,6 +35,12 @@ function useLinksDisplayOption<K extends LinksDisplayKey>(
   () => void,
 ] {
   const [value, setValue] = useState(overrideValue ?? persisted[key]);
+
+  useEffect(() => {
+    if (overrideValue !== undefined && overrideValue !== value) {
+      setValue(overrideValue);
+    }
+  }, [overrideValue]);
 
   return [value, setValue, () => setValue(persisted[key])];
 }
