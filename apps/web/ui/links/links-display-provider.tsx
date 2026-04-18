@@ -16,6 +16,7 @@ import {
   SetStateAction,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import * as z from "zod/v4";
@@ -35,10 +36,14 @@ function useLinksDisplayOption<K extends LinksDisplayKey>(
   () => void,
 ] {
   const [value, setValue] = useState(overrideValue ?? persisted[key]);
+  const lastOverrideValue = useRef(overrideValue);
 
   useEffect(() => {
-    if (overrideValue !== undefined && overrideValue !== value) {
-      setValue(overrideValue);
+    if (overrideValue !== lastOverrideValue.current) {
+      lastOverrideValue.current = overrideValue;
+      if (overrideValue !== undefined) {
+        setValue(overrideValue);
+      }
     }
   }, [overrideValue]);
 

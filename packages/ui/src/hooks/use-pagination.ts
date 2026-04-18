@@ -1,5 +1,5 @@
 import { DEFAULT_PAGINATION_LIMIT } from "@dub/utils";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useTablePagination } from "../table/use-table-pagination";
 import { useRouterStuff } from "./use-router-stuff";
 
@@ -21,34 +21,28 @@ export function usePagination(pageSize = DEFAULT_PAGINATION_LIMIT) {
   const { searchParams, queryParams } = useRouterStuff();
   const rawPage = searchParams.get("page");
 
-  const currentUrlPage = useMemo(() => parsePageParam(rawPage), [rawPage]);
-
-  const lastSyncedPage = useRef(currentUrlPage);
+  const page = useMemo(() => parsePageParam(rawPage), [rawPage]);
 
   const { pagination, setPagination } = useTablePagination({
     pageSize,
-    page: currentUrlPage,
-  });
-
-  useEffect(() => {
-    lastSyncedPage.current = currentUrlPage;
-  }, [currentUrlPage]);
-
-  useEffect(() => {
-    if (pagination.pageIndex !== lastSyncedPage.current) {
-      lastSyncedPage.current = pagination.pageIndex;
+    page,
+    onPageChange: (p) => {
+      const validatedPage = parsePageParam(p.toString());
+      if (validatedPage === page) {
+        return;
+      }
       queryParams(
-        pagination.pageIndex === 1
+        validatedPage === 1
           ? { del: "page", scroll: false }
           : {
               set: {
-                page: pagination.pageIndex.toString(),
+                page: validatedPage.toString(),
               },
               scroll: false,
             },
       );
-    }
-  }, [pagination.pageIndex]);
+    },
+  });
 
   return { pagination, setPagination };
 }

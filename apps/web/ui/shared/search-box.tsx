@@ -120,24 +120,20 @@ export function SearchBoxPersisted({
 
   // Set URL param when debounced value changes
   useEffect(() => {
-    const currentValue = searchParams.get(urlParam) ?? "";
-    if (currentValue !== debouncedValue) {
+    if (searchParams.get(urlParam) ?? "" !== debouncedValue)
       queryParams(
         debouncedValue === ""
           ? { del: [urlParam, "page"] }
           : { set: { [urlParam]: debouncedValue }, del: "page" },
       );
-    }
   }, [debouncedValue]);
 
   // Set value when URL param changes
   useEffect(() => {
     const search = searchParams.get(urlParam);
-    const searchValue = search ?? "";
     // Only update if the value and debouncedValue are synced (the user isn't actively typing)
-    if (searchValue !== value && value === debouncedValue) {
-      setValue(searchValue);
-    }
+    if ((search ?? "") !== value && value === debouncedValue)
+      setValue(search ?? "");
   }, [searchParams.get(urlParam)]);
 
   return (
