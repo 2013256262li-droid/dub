@@ -24,6 +24,7 @@ export default function LinkSort() {
               onClick={() => {
                 setSort(slug);
                 queryParams({
+                  set: { sortBy: slug },
                   del: [
                     "sort", // Remove legacy query param
                     "page", // Reset pagination
