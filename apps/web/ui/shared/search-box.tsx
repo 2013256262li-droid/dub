@@ -120,7 +120,7 @@ export function SearchBoxPersisted({
 
   // Set URL param when debounced value changes
   useEffect(() => {
-    if (searchParams.get(urlParam) ?? "" !== debouncedValue)
+    if ((searchParams.get(urlParam) ?? "") !== debouncedValue)
       queryParams(
         debouncedValue === ""
           ? { del: [urlParam, "page"] }

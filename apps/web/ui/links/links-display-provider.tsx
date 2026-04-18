@@ -41,11 +41,9 @@ function useLinksDisplayOption<K extends LinksDisplayKey>(
   useEffect(() => {
     if (overrideValue !== lastOverrideValue.current) {
       lastOverrideValue.current = overrideValue;
-      if (overrideValue !== undefined) {
-        setValue(overrideValue);
-      }
+      setValue(overrideValue ?? persisted[key]);
     }
-  }, [overrideValue]);
+  }, [overrideValue, persisted, key]);
 
   return [value, setValue, () => setValue(persisted[key])];
 }
