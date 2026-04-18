@@ -106,12 +106,16 @@ export default function LinkDisplay() {
                   checked={showArchived}
                   fn={(checked) => {
                     setShowArchived(checked);
-                    queryParams({
-                      del: [
-                        "showArchived", // Remove legacy query param
-                        "page", // Reset pagination
-                      ],
-                    });
+                    queryParams(
+                      checked
+                        ? {
+                            set: { showArchived: "true" },
+                            del: "page", // Reset pagination
+                          }
+                        : {
+                            del: ["showArchived", "page"],
+                          },
+                    );
                   }}
                 />
               </div>

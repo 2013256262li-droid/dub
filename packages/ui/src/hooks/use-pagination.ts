@@ -1,5 +1,5 @@
 import { DEFAULT_PAGINATION_LIMIT } from "@dub/utils";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useTablePagination } from "../table/use-table-pagination";
 import { useRouterStuff } from "./use-router-stuff";
 
@@ -8,53 +8,38 @@ export type PaginationState = {
   pageSize: number;
 };
 
+function parsePageParam(pageParam: string | null): number {
+  if (!pageParam) return 1;
+  const parsed = parseInt(pageParam, 10);
+  if (isNaN(parsed) || parsed < 1 || !Number.isInteger(parsed)) {
+    return 1;
+  }
+  return parsed;
+}
+
 export function usePagination(pageSize = DEFAULT_PAGINATION_LIMIT) {
   const { searchParams, queryParams } = useRouterStuff();
+  const rawPage = searchParams.get("page");
 
-  const page = useMemo(
-    () => parseInt(searchParams.get("page") || "1") || 1,
-    [searchParams.get("page")],
-  );
+  const page = useMemo(() => parsePageParam(rawPage), [rawPage]);
 
   const { pagination, setPagination } = useTablePagination({
     pageSize,
     page,
     onPageChange: (p) => {
+      const validatedPage = parsePageParam(p.toString());
       queryParams(
-        p === 1
+        validatedPage === 1
           ? { del: "page", scroll: false }
           : {
               set: {
-                page: p.toString(),
+                page: validatedPage.toString(),
               },
               scroll: false,
             },
       );
     },
   });
-
-  // Update state when URL parameter changes
-  useEffect(() => {
-    const page = parseInt(searchParams.get("page") || "1") || 1;
-    setPagination((p) => ({
-      ...p,
-      pageIndex: page,
-    }));
-  }, [searchParams.get("page")]);
-
-  // Update URL parameter when state changes
-  useEffect(() => {
-    queryParams(
-      pagination.pageIndex === 1
-        ? { del: "page", scroll: false }
-        : {
-            set: {
-              page: pagination.pageIndex.toString(),
-            },
-            scroll: false,
-          },
-    );
-  }, [pagination]);
 
   return { pagination, setPagination };
 }

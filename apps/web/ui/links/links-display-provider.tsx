@@ -67,13 +67,36 @@ export const LinksDisplayContext = createContext<{
   reset: () => {},
 });
 
-const parseSort = (sort: string) =>
-  linksSortOptions.find(({ slug }) => slug === sort)?.slug ??
-  linksSortOptions[0].slug;
+function isValidSortSlug(slug: string): slug is LinksSortSlug {
+  return linksSortOptions.some((option) => option.slug === slug);
+}
+
+function parseSortParam(sortParam: string | null): LinksSortSlug | undefined {
+  if (!sortParam) return undefined;
+  if (isValidSortSlug(sortParam)) {
+    return sortParam;
+  }
+  return undefined;
+}
+
+function parseBooleanParam(
+  param: string | null,
+): boolean | undefined {
+  if (!param) return undefined;
+  const lower = param.toLowerCase().trim();
+  if (lower === "true" || lower === "1" || lower === "yes") {
+    return true;
+  }
+  if (lower === "false" || lower === "0" || lower === "no") {
+    return false;
+  }
+  return undefined;
+}
 
 export function LinksDisplayProvider({ children }: PropsWithChildren) {
   const searchParams = useSearchParams();
   const sortRaw = searchParams?.get("sortBy");
+  const sortLegacyRaw = searchParams?.get("sort");
   const showArchivedRaw = searchParams?.get("showArchived");
 
   const [persisted, setPersisted] = useWorkspacePreferences("linksDisplay", {
@@ -88,17 +111,21 @@ export function LinksDisplayProvider({ children }: PropsWithChildren) {
     persisted!,
   );
 
+  const sortOverride = parseSortParam(sortRaw) ?? parseSortParam(sortLegacyRaw);
+
   const [sortBy, setSort, resetSort] = useLinksDisplayOption(
     "sortBy",
     persisted!,
-    sortRaw ? parseSort(sortRaw) : undefined,
+    sortOverride,
   );
+
+  const showArchivedOverride = parseBooleanParam(showArchivedRaw);
 
   const [showArchived, setShowArchived, resetShowArchived] =
     useLinksDisplayOption(
       "showArchived",
       persisted!,
-      showArchivedRaw ? showArchivedRaw === "true" : undefined,
+      showArchivedOverride,
     );
 
   const [displayProperties, setDisplayProperties, resetDisplayProperties] =
